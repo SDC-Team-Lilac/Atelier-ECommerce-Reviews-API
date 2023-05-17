@@ -20,8 +20,29 @@ const pool = new Pool({
 });
 
 module.exports = {
-  query: (text, params) => {
-    //console.log('Query submitted', { text, params })
-    return pool.query(text, params)
+  query: (text, params, callback) => {
+    return pool.query(text, params);
   }
+    //return pool.query(text, params)
+  /*
+  query: (text, params, callback) => {
+    //console.log('Query submitted', { text, params })
+    pool.query(text, params, (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        callback(null, res)
+      }
+    });
+    //return pool.query(text, params)
+  }
+  */
+ /*
+  query: async function connect(text, params) {
+    const pool = new Pool(credentials);
+    const now = await pool.query(text, params);
+    await pool.end();
+    return now;
+  }
+  */
 }

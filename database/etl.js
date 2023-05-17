@@ -29,8 +29,11 @@ let csvStream = fastcsv
     //const query =
     //  "INSERT INTO products (product_id, name, slogan, description, category, default_price) VALUES ($1, $2, $3, $4, $5, $6)";
 
+    //const query =
+    //  "INSERT INTO reviews (review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)";
+
     const query =
-      "INSERT INTO products (review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)";
+        "INSERT INTO photos (product_id, review_id, url)"
 
     pool.connect((err, client, done) => {
       if (err) throw err;
@@ -52,3 +55,12 @@ let csvStream = fastcsv
   });
 
 stream.pipe(csvStream);
+
+/*
+
+COPY reviews(review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/reviews.csv'
+DELIMITER ','
+CSV HEADER;
+
+*/

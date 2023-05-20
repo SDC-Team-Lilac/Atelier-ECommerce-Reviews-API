@@ -9,6 +9,7 @@ services:
         POSTGRES_PASSWORD: 'postgres'
         POSTGRES_USER: 'postgres'
         POSTGRES_DB: 'postgres'
+        POSTGRES_HOST_AUTH_METHOD: 'trust'
       volumes:
         - db:/var/lib/postgresql/data
         - /Users/jccode/HR/rpp2210-sdc-lilac-reviews/data:/var/lib/postgresql/data/reviewdata

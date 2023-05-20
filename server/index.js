@@ -5,6 +5,7 @@ const port = 3001;
 const routes = require('./routes.js');
 
 app.get('/', (req, res) => {
+  console.log('Request received')
   res.send('Test success! Server is running!')
 })
 

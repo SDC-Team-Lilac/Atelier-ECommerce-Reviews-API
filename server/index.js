@@ -4,6 +4,10 @@ const app = express();
 const port = 3001;
 const routes = require('./routes.js');
 
+app.get('/', (req, res) => {
+  res.send('Test success! Server is running!')
+})
+
 app.use(express.json());
 app.use('/', routes);
 

@@ -1,7 +1,7 @@
 const express = require('express');
 var bodyParser = require('body-parser');
 const app = express();
-const port = 3001;
+const port = 8080;
 const routes = require('./routes.js');
 
 app.get('/', (req, res) => {

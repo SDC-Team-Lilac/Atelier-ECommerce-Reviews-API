@@ -7,6 +7,7 @@
     "client-dev": "webpack --mode development --watch",
     "server-dev": "nodemon ./server/index.js",
     "server": "node ./server/index.js",
+    "start": "node ./server/index.js",
     "tables": "node ./database/createTables.js",
     "hello": "node hello.js",
     "pg-test": "node database/index.js",

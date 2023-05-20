@@ -14,7 +14,6 @@ services:
         - /Users/jccode/HR/rpp2210-sdc-lilac-reviews/data:/var/lib/postgresql/data/reviewdata
   server:
     image: my-app
-    restart: on-failure
     build: .
     ports:
       - 3001:3001

@@ -1,17 +1,31 @@
 const { Client } = require("pg");
 
+
+const client = new Client({
+  host: 'db',
+  user: 'postgres',
+  database: 'postgres',
+  password: 'postgres',
+  port: 5432
+});
+
+
+/*
 const client = new Client({
   host: 'localhost',
   user: 'jccode',
-  database: 'reviews',
+  database: 'postgres',
   password: '',
-  port: 5432,
+  port: 5432
 });
+*/
 
-const execute = async (query) => {
+const execute = async (queries) => {
   try {
       await client.connect();     // gets connection
-      await client.query(query);  // sends queries
+      for (var i = 0; i < queries.length; i++) {
+        await client.query(queries[i]);  // sends queries
+      }
       return true;
   } catch (error) {
       console.error(error.stack);
@@ -71,18 +85,6 @@ var characteristicReviewsSchema = `
     REFERENCES reviews("review_id")
 );`;
 
-var ratingsSchema = `
-  CREATE TABLE "ratings" (
-    "product_id" INTEGER NOT NULL,
-    "1" INTEGER,
-    "2" INTEGER,
-    "3" INTEGER,
-    "4" INTEGER,
-    "5" INTEGER,
-    FOREIGN KEY ("product_id")
-    REFERENCES products("product_id")
-);`;
-
 var recommendedSchema = `
   CREATE TABLE "recommended" (
     "product_id" INTEGER NOT NULL,
@@ -100,28 +102,96 @@ var photosSchema = `
     REFERENCES reviews("review_id")
 );`;
 
-var copyCharacteristics = `
-  COPY characteristics(characteristic_id,product_id,name)
-  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/characteristics.csv'
-  DELIMITER ','
-  CSV HEADER;`
-
-execute(characteristicReviewsSchema).then(result => {
+execute([productsSchema, reviewsSchema, characteristicsSchema,characteristicReviewsSchema, recommendedSchema, photosSchema]).then(result => {
   if (result) {
       console.log('Table created');
   }
 });
 
 /*
+PRODUCTS
+
+  COPY products(product_id,name,slogan,description,category,default_price)
+  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/product.csv'
+  DELIMITER ','
+  CSV HEADER;
+
+  COPY products(product_id,name,slogan,description,category,default_price)
+  FROM '/var/lib/postgresql/data/reviewdata/product.csv'
+  DELIMITER ','
+  CSV HEADER;
+*/
+
+/*
+REVIEWS
+  COPY reviews(review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/reviews.csv'
+  DELIMITER ','
+  CSV HEADER;
+
+  COPY reviews(review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+  FROM '/var/lib/postgresql/data/reviewdata/reviews.csv'
+  DELIMITER ','
+  CSV HEADER;
+*/
+
+/*
+CHARACTERISTICS
+  COPY characteristics(characteristic_id,product_id,name)
+  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/characteristics.csv'
+  DELIMITER ','
+  CSV HEADER;
+
+  COPY characteristics(characteristic_id,product_id,name)
+  FROM '/var/lib/postgresql/data/reviewdata/characteristics.csv'
+  DELIMITER ','
+  CSV HEADER;
+*/
+
+/*
+CHARACTERISTICS REVIEWS
+  COPY "characteristicReviews"(characteristic_review_id,characteristic_id,review_id,value)
+  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/characteristic_reviews.csv'
+  DELIMITER ','
+  CSV HEADER;
+
+  COPY "characteristicReviews"(characteristic_review_id,characteristic_id,review_id,value)
+  FROM '/var/lib/postgresql/data/reviewdata/characteristic_reviews.csv'
+  DELIMITER ','
+  CSV HEADER;
+*/
+
+/*
+PHOTOS REVIEWS
+  COPY photos(photo_id,review_id,url)
+  FROM '/Users/jccode/HR/rpp2210-sdc-lilac-reviews/data/reviews_photos.csv'
+  DELIMITER ','
+  CSV HEADER;
+
+  COPY photos(photo_id,review_id,url)
+  FROM '/var/lib/postgresql/data/reviewdata/reviews_photos.csv'
+  DELIMITER ','
+  CSV HEADER;
+*/
+
+/*
+var ratingsSchema = `
+  CREATE TABLE "ratings" (
+    "product_id" INTEGER NOT NULL,
+    "1" INTEGER,
+    "2" INTEGER,
+    "3" INTEGER,
+    "4" INTEGER,
+    "5" INTEGER,
+    FOREIGN KEY ("product_id")
+    REFERENCES products("product_id")
+);`;
 
 execute(reviewsSchema).then(result => {
   if (result) {
       console.log('Table created');
   }
 });
-*/
-
-/*
 
 const connectDb = async () => {
   try {
@@ -141,10 +211,6 @@ const connectDb = async () => {
   }
 }
 connectDb()
-
-*/
-
-/*
 
 const createTable = async () => {
   try {

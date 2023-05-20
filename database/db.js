@@ -11,11 +11,21 @@ const pool = new Pool ({
 })
 */
 
+/*
 const pool = new Pool({
   host: 'localhost',
   user: 'jccode',
   database: 'reviews',
   password: '',
+  port: 5432
+});
+*/
+
+const pool = new Pool({
+  host: 'db',
+  user: 'postgres',
+  database: 'postgres',
+  password: 'postgres',
   port: 5432
 });
 

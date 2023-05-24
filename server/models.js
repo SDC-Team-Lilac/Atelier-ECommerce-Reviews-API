@@ -21,54 +21,131 @@ module.exports = {
 
     return result;
   },
-
-  /*
+/*
   getMeta: async (query) => {
     const product_id = query.product_id;
     // get ratings
-    const getRatings = new Promise((resolve, reject) => {
-      var ratings = {};
-      db.query('SELECT rating FROM reviews WHERE product_id = $1;', [product_id])
-      .then(ratingsData => {
-        var productRatings = ratingsData.rows;
-        for (var i = 0; i < productRatings.length; i++) {
-          if (ratings[productRatings[i].rating] === undefined) {
-            ratings[productRatings[i].rating] = 1;
-          } else {
-            ratings[productRatings[i].rating]++;
-          }
-        }
-        resolve(ratings);
-      })
-    });
+    var data = await db.query('SELECT rating FROM reviews WHERE product_id = $1;', [product_id]);
+    var productRatings = data.rows;
+    var ratings = {};
+    for (var i = 0; i < productRatings.length; i++) {
+      if (ratings[productRatings[i].rating] === undefined) {
+        ratings[productRatings[i].rating] = 1;
+      } else {
+        ratings[productRatings[i].rating]++;
+      }
+    }
+
     // get recommended
-    const getRecommend = new Promise((resolve, reject) => {
-      console.log('getrec')
-      var recommended = {false: 0, true: 0};
-      //var recommendData = await db.query('SELECT recommend FROM reviews WHERE product_id = $1;', [product_id]);
-      db.query('SELECT recommend FROM reviews WHERE product_id = $1;', [product_id])
-      .then((recommendData) => {
-        var recommendRatings = recommendData.rows;
-        for (var i = 0; i < recommendRatings.length; i++) {
-          if (recommendRatings[i].recommend === false) {
-            recommended.false++;
-          } else {
-            recommended.true++;
-          }
-        }
-        resolve(recommended);
-      })
-    });
+    var data = await db.query('SELECT recommend FROM reviews WHERE product_id = $1;', [product_id]);
+    var recommendRatings = data.rows;
+    var recommended = {false: 0, true: 0};
+    for (var i = 0; i < recommendRatings.length; i++) {
+      if (recommendRatings[i].recommend === false) {
+        recommended.false++;
+      } else {
+        recommended.true++;
+      }
+    }
 
     // get characteristic reviews
-    const getCharacteristicRev = async function() {
+    var reviewData = await db.query('SELECT review_id FROM reviews WHERE product_id = $1;', [product_id]);
+    var review_ids = reviewData.rows;
+    var characteristicReviewsArr = [];
+    var characteristicReviews = {};
+    if (reviewData.rows.length !== 0) {
+      var review_idsArr = [];
+      for (var i = 0; i < review_ids.length; i++) {
+        review_idsArr.push(review_ids[i].review_id);
+      }
+      var charRevQuery = 'SELECT * FROM "characteristicReviews" WHERE (review_id = ' + review_idsArr[0];
+      for (var i = 1; i < review_idsArr.length; i++) {
+        charRevQuery += ' OR review_id = ' + review_idsArr[i];
+      }
+      charRevQuery += ');'
+
+      var characteristicReviewsData = await db.query(charRevQuery);
+      for (var j = 0; j < characteristicReviewsData.rows.length; j++) {
+        if (characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] === undefined) {
+          characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] = [];
+          characteristicReviews[characteristicReviewsData.rows[j].characteristic_id].push(characteristicReviewsData.rows[j].value);
+        } else {
+          characteristicReviews[characteristicReviewsData.rows[j].characteristic_id].push(characteristicReviewsData.rows[j].value);
+        }
+      }
+      const average = array => array.reduce((a, b) => a + b) / array.length;
+      // get characteristics
+      var characteristics = {};
+      for (var key in characteristicReviews) {
+        var characteristicData = await db.query('SELECT name FROM characteristics WHERE characteristic_id = $1;', [key]);
+        characteristics[characteristicData.rows[0].name] = {id: Number(key), value: average(characteristicReviews[key]).toFixed(5)};
+      }
+    } else {
+      var characteristics = {};
+    }
+
+    var meta = {
+      product_id: product_id,
+      ratings: ratings,
+      recommended: recommended,
+      characteristics: characteristics
+    }
+
+    return meta;
+  },
+*/
+
+  getMeta: async (query) => {
+    const product_id = query.product_id;
+
+    async function getRatings() {
+      // get ratings
+      var data = await db.query('SELECT rating FROM reviews WHERE product_id = $1;', [product_id]);
+      var productRatings = data.rows;
+      var ratings = {};
+      for (var i = 0; i < productRatings.length; i++) {
+        if (ratings[productRatings[i].rating] === undefined) {
+          ratings[productRatings[i].rating] = 1;
+        } else {
+          ratings[productRatings[i].rating]++;
+        }
+      }
+      return ratings;
+    };
+
+    async function getRecommended() {
+      // get recommended
+      var data = await db.query('SELECT recommend FROM reviews WHERE product_id = $1;', [product_id]);
+      var recommendRatings = data.rows;
+      var recommended = {false: 0, true: 0};
+      for (var i = 0; i < recommendRatings.length; i++) {
+        if (recommendRatings[i].recommend === false) {
+          recommended.false++;
+        } else {
+          recommended.true++;
+        }
+      }
+      return recommended;
+    };
+
+    async function getCharacteristics() {
+      // get characteristic reviews
       var reviewData = await db.query('SELECT review_id FROM reviews WHERE product_id = $1;', [product_id]);
       var review_ids = reviewData.rows;
       var characteristicReviewsArr = [];
       var characteristicReviews = {};
+      if (reviewData.rows.length !== 0) {
+        var review_idsArr = [];
+        for (var i = 0; i < review_ids.length; i++) {
+          review_idsArr.push(review_ids[i].review_id);
+        }
+        var charRevQuery = 'SELECT * FROM "characteristicReviews" WHERE (review_id = ' + review_idsArr[0];
+        for (var i = 1; i < review_idsArr.length; i++) {
+          charRevQuery += ' OR review_id = ' + review_idsArr[i];
+        }
+        charRevQuery += ');'
 
-      for (var i = 0; i < review_ids.length; i++) {
-        var characteristicReviewsData = await db.query('SELECT * FROM "characteristicReviews" WHERE review_id = $1;', [review_ids[i].review_id]);
+        var characteristicReviewsData = await db.query(charRevQuery);
         for (var j = 0; j < characteristicReviewsData.rows.length; j++) {
           if (characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] === undefined) {
             characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] = [];
@@ -77,138 +154,34 @@ module.exports = {
             characteristicReviews[characteristicReviewsData.rows[j].characteristic_id].push(characteristicReviewsData.rows[j].value);
           }
         }
+        const average = array => array.reduce((a, b) => a + b) / array.length;
+        // get characteristics
+        var characteristics = {};
+        for (var key in characteristicReviews) {
+          var characteristicData = await db.query('SELECT name FROM characteristics WHERE characteristic_id = $1;', [key]);
+          characteristics[characteristicData.rows[0].name] = {id: Number(key), value: average(characteristicReviews[key]).toFixed(5)};
+        }
+        return characteristics;
+      } else {
+        return {};
       }
-      return characteristicReviews;
     }
 
-    /*
-    // get characteristic reviews
-    const getCharacteristicRev = new Promise((resolve, reject) => {
-      var characteristics = {};
-      //var reviewData = await db.query('SELECT review_id FROM reviews WHERE product_id = $1;', [product_id]);
-      db.query('SELECT review_id FROM reviews WHERE product_id = $1;', [product_id])
-      .then((reviewData) => {
-        var review_ids = reviewData.rows;
-        var characteristicReviewsArr = [];
-        var characteristicReviews = {};
-        for (var i = 0; i < review_ids.length; i++) {
-          var db.query('SELECT * FROM "characteristicReviews" WHERE review_id = $1;', [review_ids[i].review_id])
-          .then(characteristicReviewsData => {
-            for (var j = 0; j < characteristicReviewsData.rows.length; j++) {
-              if (characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] === undefined) {
-                characteristicReviews[characteristicReviewsData.rows[j].characteristic_id] = [];
-                characteristicReviews[characteristicReviewsData.rows[j].characteristic_id].push(characteristicReviewsData.rows[j].value);
-              } else {
-                characteristicReviews[characteristicReviewsData.rows[j].characteristic_id].push(characteristicReviewsData.rows[j].value);
-              }
-            }
-            //console.log(characteristicReviews)
-            return characteristicReviews;
-          })
-          .then(result => {
-            characteristicReviews = result;
-            console.log(characteristicReviews)
-          })
-        }
-        console.log(characteristicReviews);
-        //return characteristicReviews;
-      })
-      .then(characteristicReviews => {
-        console.log(characteristicReviews)
-        // get characteristics
-        for (var key in characteristicReviews) {
-          //var characteristicData = await db.query('SELECT name FROM characteristics WHERE characteristic_id = $1;', [key]);
-          db.query('SELECT name FROM characteristics WHERE characteristic_id = $1;', [key])
-          .then((characteristicData) => {
-            console.log('chardata', characteristicData)
-            characteristics[characteristicData.rows[0].name] = {id: Number(key), value: average(characteristicReviews[key]).toFixed(5)};
-          })
-        }
-        console.log(characteristics)
-        resolve(characteristics);
-      })
-    });
+    const ratings = await getRatings();
+    const recommended = await getRecommended();
+    const characteristics = await getCharacteristics();
 
-    const average = array => array.reduce((a, b) => a + b) / array.length;
+    var meta = {
+      product_id: product_id,
+      ratings: ratings,
+      recommended: recommended,
+      characteristics: characteristics
+    }
 
-    Promise.all([getRatings, getRecommend, getCharacteristicRev()])
-    .then((results) => {
-
-      var meta = {
-        product_id: product_id,
-        ratings: results[0],
-        recommended: results[1],
-        characteristics: results[2]
-      }
-
-     var meta = {
-      product_id: { '1': 5, '2': 2, '3': 3, '4': 5, '5': 3 },
-      recommended: { false: 5, true: 13 },
-      ratings: {
-        '10': [ 5 ]
-      },
-      characteristics: {
-       '239716': [
-         3, 4, 5, 5, 2, 1, 3,
-         1, 4, 5, 1, 3, 2, 4,
-         4, 4, 5
-       ],
-       '239717': [
-         2, 5, 5, 1, 4, 3, 5,
-         2, 1, 3, 5, 5, 5, 2,
-         3, 1, 3
-       ],
-       '239718': [
-         3, 3, 5, 3, 2, 3, 2,
-         5, 3, 2, 3, 4, 4, 3,
-         3, 3, 1
-       ],
-       '239719': [
-         3, 5, 5, 2, 2, 3, 4,
-         5, 2, 4, 1, 4, 5, 1,
-         4, 3, 5
-       ]
-      }
-     }
-     console.log(meta)
-      return meta;
-    });
-
-      var meta = {
-        product_id: product_id,
-        ratings: results[0],
-        recommended: results[1],
-        characteristics: {}
-      }
-      var charRev = results[2];
-      return [meta, charRev()]
-    })
-    .then(result => {
-      console.log(result)
-    })
-
-
-      .then(results => {
-        var meta = {
-          product_id: product_id,
-          ratings: results[0],
-          recommended: results[1],
-          characteristics: characteristics
-        }
-      })
-      .then(results => {
-        console.log(meta)
-        return meta;
-      })
-    })
-    .catch((error) => {
-      console.log(error)
-    });
-
+    return meta;
   },
 
-  */
-
+/*
   getMeta: async (query) => {
     const product_id = query.product_id;
     // get ratings
@@ -265,6 +238,7 @@ module.exports = {
     }
     return meta;
   },
+*/
 
   postReview: async (query) => {
     const reviewCount = await db.query('SELECT COUNT(*) FROM reviews');

@@ -21,6 +21,7 @@ const pool = new Pool({
 });
 */
 
+/*
 const pool = new Pool({
   host: 'db',
   user: 'postgres',
@@ -28,6 +29,17 @@ const pool = new Pool({
   password: 'postgres',
   port: 5432
 });
+*/
+
+
+const pool = new Pool({
+  host: process.env.PGHOST,
+  user: 'postgres',
+  database: 'postgres',
+  password: 'postgres',
+  port: 5432
+});
+
 
 module.exports = {
   query: (text, params, callback) => {

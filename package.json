@@ -6,7 +6,7 @@
   "scripts": {
     "client-dev": "webpack --mode development --watch",
     "server-dev": "nodemon ./server/index.js",
-    "server": "node ./server/index.js",
+    "server": "node -r newrelic ./server/index.js",
     "start": "node ./server/index.js",
     "tables": "node ./database/createTables.js",
     "hello": "node hello.js",
@@ -45,5 +45,6 @@
     "webpack": "^5.79.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.13.2"
-  }
+  },
+  "newrelic": "latest"
 }

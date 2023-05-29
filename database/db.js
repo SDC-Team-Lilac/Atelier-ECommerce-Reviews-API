@@ -33,7 +33,7 @@ const pool = new Pool({
 
 
 const pool = new Pool({
-  host: process.env.PGHOST,
+  host: process.env.HOST,
   user: 'postgres',
   database: 'postgres',
   password: 'postgres',

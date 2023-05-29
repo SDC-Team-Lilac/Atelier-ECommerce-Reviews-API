@@ -4,6 +4,10 @@ const app = express();
 const port = 8080;
 const routes = require('./routes.js');
 
+app.get('/loaderio-a8bf5a55e0c584db46187a501aef33ab', (req, res) => {
+  res.send('loaderio-a8bf5a55e0c584db46187a501aef33ab')
+})
+
 app.get('/', (req, res) => {
   console.log('Request received')
   res.send('Test success! Server is running!')

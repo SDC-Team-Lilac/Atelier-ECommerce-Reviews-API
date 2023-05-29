@@ -1,10 +1,41 @@
 const models = require('./models');
+const redis = require('redis');
 
 module.exports = {
   getList: (req, res) => {
-    models.getList(req.query)
-    .then((result) => {res.status(200).send({results: result.rows})})
-    .catch((err) => {res.status(500).send('ERROR get reviews')})
+
+    function cache(req, res) {
+      const request = JSON.stringify(req.query);
+      client.get(request, (err, data) => {
+        if (err) {
+          console.log(err);
+        };
+        if (data) {
+          res.status(200).send({results: JSON.parse(data)});
+        } else {
+          getReviews(req, res);
+        };
+      })
+    }
+
+    function getReviews(req, res) {
+      models.getList(req.query)
+      .then((result) => {
+        res.status(200).send({results: result.rows});
+        client.setex(JSON.stringify(req.query), 3600, JSON.stringify(result.rows));
+      })
+      .catch((err) => {res.status(500).send('ERROR get reviews')})
+    }
+
+    const client = redis.createClient({
+      socket: { port: 6379 },
+      legacyMode: true,
+    });
+
+    client.connect();
+    client.on('connect', () => {
+      cache(req, res);
+    });
   },
 
   getMeta: (req, res) => {

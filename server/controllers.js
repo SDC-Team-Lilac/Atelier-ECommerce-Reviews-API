@@ -28,7 +28,7 @@ module.exports = {
     }
 
     const client = redis.createClient({
-      url: 'redis://redis:6379'
+      url: 'redis://redis:6379',
       legacyMode: true,
     });
 

@@ -29,7 +29,7 @@ module.exports = {
 
     const client = redis.createClient({
       socket: {
-        host: 'redis',
+        host: 'redis-server',
         port: 6379
       }
       legacyMode: true,

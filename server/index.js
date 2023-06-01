@@ -4,12 +4,10 @@ const app = express();
 const port = 8080;
 const routes = require('./routes.js');
 
-/*
 app.get('/', (req, res) => {
-  console.log('Request received')
+  //console.log('Request received')
   res.send('Test success! Server is running!')
 })
-*/
 
 app.use(express.json());
 app.use('/', routes);
